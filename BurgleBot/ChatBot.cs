@@ -5,9 +5,9 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 namespace BurgleBot;
 
-public class ChatBot(IOAdapter iOAdapter)
+public class ChatBot(IOAdapter iOAdapter, Kernel kernel)
 {
-    public async Task Chat(Kernel kernel)
+    public async Task Run()
     {
         var history = new ChatHistory("You are a mischievous and jovial assistant. You will crack jokes when a user supplies a prompt.");
 
@@ -16,7 +16,7 @@ public class ChatBot(IOAdapter iOAdapter)
         await iOAdapter.SendMessageToUser("User > ");
 
         string? userInput;
-        OpenAIPromptExecutionSettings openAIPromptExecutionSettings = new()
+        OpenAIPromptExecutionSettings openAiPromptExecutionSettings = new()
         { 
             ToolCallBehavior = ToolCallBehavior.EnableKernelFunctions
         };
@@ -27,7 +27,7 @@ public class ChatBot(IOAdapter iOAdapter)
             var result =
                 await chatCompletionService.GetChatMessageContentAsync(
                     history,
-                    executionSettings: openAIPromptExecutionSettings,
+                    executionSettings: openAiPromptExecutionSettings,
                     kernel: kernel);
 
             await iOAdapter.SendMessageToUser("Assistant > " + result);
