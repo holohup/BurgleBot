@@ -1,0 +1,33 @@
+# Build results
+bin/
+obj/
+
+# Rider project files
+.idea/
+
+# Visual Studio files
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# dotnet CLI
+project.lock.json
+project.fragment.lock.json
+
+# Logs
+*.log
+
+# Environment files
+.env
+
+# Others
+*.ncrunchproject
+*.localhistory
+*.orig
+_ReSharper*/
