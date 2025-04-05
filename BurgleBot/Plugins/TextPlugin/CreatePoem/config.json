@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "description": "Describes an image from the internet",
+  "description": "Creates a poem based on the description",
   "execution_settings": {
     "default": {
       "max_tokens": 4096,
@@ -12,8 +12,8 @@
   },
   "input_variables": [
     {
-      "name": "imageUrl",
-      "description": "Image URL",
+      "name": "description",
+      "description": "Description text",
       "default": "",
       "is_required": true
     }

@@ -15,19 +15,19 @@ var configuration = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
     .Build();
 
-var token = configuration["OPENAI_API_KEY"]!;
-var modelId = configuration["MODEL"]!;
+var token = configuration["OPENAI_API_KEY"] ?? throw new ApplicationException("OPENAI_API_KEY not found");
+var modelId = configuration["MODEL"] ?? throw new ApplicationException("MODEL not found");
 var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, token);
 
 builder.Services.AddLogging(configure => configure.AddConsole());
 builder.Services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Information));
 
-string pluginsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "TextPlugin");
+string textPluginDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "TextPlugin");
 var semanticKernelAdapter = new SemanticKernelAdapter();
 builder.Services.AddSingleton<ISemanticKernelService>(semanticKernelAdapter);
 builder.Plugins.AddFromType<DataFetcherPlugin>();
 builder.Plugins.AddFromType<DataProcessorPlugin>();
-builder.Plugins.AddFromPromptDirectory(pluginsDirectory);
+builder.Plugins.AddFromPromptDirectory(textPluginDirectory);
 
 Kernel kernel = builder.Build();
 semanticKernelAdapter.Kernel = kernel;
