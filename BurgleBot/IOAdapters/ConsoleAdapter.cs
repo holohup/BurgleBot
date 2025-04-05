@@ -1,14 +1,15 @@
 namespace BurgleBot.IOAdapters;
 
-public class ConsoleAdapter : IOAdapter
+public class ConsoleAdapter : IIoAdapter
 {
     public async Task<string> GetUserInput()
     {
+        Console.Write("User: ");
         return Console.ReadLine() ?? string.Empty;
     }
 
-    public async Task SendMessageToUser(string text)
+    public async Task SendMessageToUser(string? text)
     {
-        Console.Write(text);
+        Console.WriteLine("Assistant: " + text);
     }
 }

@@ -5,22 +5,29 @@ using Microsoft.SemanticKernel.Connectors.OpenAI;
 
 namespace BurgleBot;
 
-public class ChatBot(IOAdapter iOAdapter, Kernel kernel)
+public class ChatBot(IIoAdapter iIoAdapter, Kernel kernel)
 {
     public async Task Run()
     {
-        var history = new ChatHistory("You are a mischievous and jovial assistant. You will crack jokes when a user supplies a prompt.");
+        var history = new ChatHistory();
 
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
 
-        await iOAdapter.SendMessageToUser("User > ");
+        await iIoAdapter.SendMessageToUser("Hello! I am a helpful agent. What should I do?");
 
         string? userInput;
         OpenAIPromptExecutionSettings openAiPromptExecutionSettings = new()
         { 
-            ToolCallBehavior = ToolCallBehavior.EnableKernelFunctions
+            ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
+            ChatSystemPrompt = "You are a professional assistant, your job is to help. Be thoughtful, always check your response. Do not provide your chain of thought in the response, just the result.",
+            MaxTokens = 1024,
+            TopP = 0.9,
+            Temperature = 0.1,
+            PresencePenalty = 0,
+            FrequencyPenalty = 0,
+            // FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
         };
-        while (!string.IsNullOrWhiteSpace(userInput = await iOAdapter.GetUserInput()))
+        while (!string.IsNullOrWhiteSpace(userInput = await iIoAdapter.GetUserInput()))
         {
             history.AddUserMessage(userInput);
 
@@ -30,11 +37,8 @@ public class ChatBot(IOAdapter iOAdapter, Kernel kernel)
                     executionSettings: openAiPromptExecutionSettings,
                     kernel: kernel);
 
-            await iOAdapter.SendMessageToUser("Assistant > " + result);
-
-            history.AddMessage(result.Role, result.Content ?? string.Empty);
-
-            await iOAdapter.SendMessageToUser("\n" + "User > ");
+            await iIoAdapter.SendMessageToUser(result.Content);
+            history.AddAssistantMessage(result.Content ?? string.Empty);
         }
     }
 }
