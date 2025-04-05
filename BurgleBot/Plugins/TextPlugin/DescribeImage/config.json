@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "description": "Describes an image from the internet",
+  "execution_settings": {
+    "default": {
+      "max_tokens": 4096,
+      "temperature": 0.6,
+      "top_p": 0.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0
+    }
+  },
+  "input_variables": [
+    {
+      "name": "imageUrl",
+      "description": "Image URL",
+      "default": "",
+      "is_required": true
+    }
+  ]
+}
+

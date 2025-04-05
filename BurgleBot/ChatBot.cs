@@ -19,13 +19,14 @@ public class ChatBot(IIoAdapter iIoAdapter, Kernel kernel)
         OpenAIPromptExecutionSettings openAiPromptExecutionSettings = new()
         { 
             ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-            ChatSystemPrompt = "You are a professional assistant, your job is to help. Be thoughtful, always check your response. Do not provide your chain of thought in the response, just the result.",
+            ChatSystemPrompt = @"You are a professional assistant, your job is to help. Be thoughtful, 
+                                 always check your response. Do not provide your chain of thought in the response, 
+                                 just the result. When processing images, always provide the link to original image.",
             MaxTokens = 1024,
             TopP = 0.9,
             Temperature = 0.1,
             PresencePenalty = 0,
-            FrequencyPenalty = 0,
-            // FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+            FrequencyPenalty = 0
         };
         while (!string.IsNullOrWhiteSpace(userInput = await iIoAdapter.GetUserInput()))
         {

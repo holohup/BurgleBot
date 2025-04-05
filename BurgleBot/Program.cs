@@ -1,6 +1,8 @@
 ﻿using BurgleBot;
 using BurgleBot.IOAdapters;
 using BurgleBot.Plugins.DataFetcher;
+using BurgleBot.Plugins.DataProcessor;
+using BurgleBot.Services;
 using DotNetEnv.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,16 +18,27 @@ var configuration = new ConfigurationBuilder()
 var token = configuration["OPENAI_API_KEY"]!;
 var modelId = configuration["MODEL"]!;
 var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, token);
-builder.Plugins.AddFromType<DataFetcherPlugin>();
+
 builder.Services.AddLogging(configure => configure.AddConsole());
 builder.Services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Information));
+
+string pluginsDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "TextPlugin");
+var semanticKernelAdapter = new SemanticKernelAdapter();
+builder.Services.AddSingleton<ISemanticKernelService>(semanticKernelAdapter);
+builder.Plugins.AddFromType<DataFetcherPlugin>();
+builder.Plugins.AddFromType<DataProcessorPlugin>();
+builder.Plugins.AddFromPromptDirectory(pluginsDirectory);
+
 Kernel kernel = builder.Build();
+semanticKernelAdapter.Kernel = kernel;
 
 var services = new ServiceCollection();
 services.AddSingleton(kernel);
 services.AddSingleton<IIoAdapter, ConsoleAdapter>();
 services.AddSingleton<ChatBot>();
+
 var serviceProvider = services.BuildServiceProvider();
 
 var chatBot = serviceProvider.GetRequiredService<ChatBot>();
+
 Task.WaitAll(chatBot.Run());
