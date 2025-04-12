@@ -110,6 +110,6 @@ public sealed class DataProcessorPlugin(ISemanticKernelService kernelService)
             .GroupBy(r => r.SourceName)
             .ToDictionary(g => g.Key, g => g.Take(3).ToList());
         string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
-        return json;
+        return json[..100000];
     }
 }

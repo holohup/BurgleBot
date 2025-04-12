@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.KernelMemory;
+using Microsoft.KernelMemory.Configuration;
 using Microsoft.SemanticKernel;
 
 
@@ -69,6 +70,12 @@ static IKernelMemory GetMemoryConnector(string token, bool serverless = false)
             TextModel = "gpt-4o-mini",
             APIKey = token,
         })
+        .WithCustomTextPartitioningOptions(
+            new TextPartitioningOptions
+            {
+                MaxTokensPerParagraph = 600,
+                OverlappingTokens = 50
+            })
         .Build<MemoryServerless>();
 }
 

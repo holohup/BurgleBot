@@ -48,7 +48,7 @@ public class SemanticKernelAdapter : ISemanticKernelService
 
     private async Task<SearchResult> InvokeMemorySearchByIndex(string query, string index)
     {
-        return await Memory!.SearchAsync(query, index: index, minRelevance: 0.8);
+        return await Memory!.SearchAsync(query, index: index, minRelevance: 0.7);
 
     }
 }
