@@ -1,7 +1,9 @@
 using System.ComponentModel;
 using System.Text;
+using System.Text.Json;
 using BurgleBot.Services;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
@@ -75,7 +77,39 @@ public sealed class DataProcessorPlugin(ISemanticKernelService kernelService)
             "You are a professional forensic detective. Your job is to describe the image in as many details as you can. Describe this image:",
             imageUrl
         );
-        var chatHistory = new ChatHistory();
         return result;
+    }
+
+    [KernelFunction, Description("Returns results of recipe search to a user query in a json, where key is document filename and value - quotes found by vector search.")]
+    public async Task<string> FetchRecipe([Description("User query")] string query)
+    {
+        var result = await kernelService.FetchRecipeByVector(query);
+        var recipesBySource = result.Results
+            .GroupBy(r => r.SourceName)
+            .ToDictionary(g => g.Key, g => g.Take(3).ToList());
+        string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
+        return json;
+    }
+    
+    [KernelFunction, Description("Returns results of vector search in computer manuals.")]
+    public async Task<string> FetchComputerSpecs([Description("User query")] string query)
+    {
+        var result = await kernelService.FetchComputerSpecByVector(query);
+        var recipesBySource = result.Results
+            .GroupBy(r => r.SourceName)
+            .ToDictionary(g => g.Key, g => g.Take(3).ToList());
+        string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
+        return json;
+    }
+    
+    [KernelFunction, Description("Returns results of vector search to in kitchen appliance manuals.")]
+    public async Task<string> FetchFromApplianceManual([Description("User query")] string query)
+    {
+        var result = await kernelService.FetchApplianceSpecByVector(query);
+        var recipesBySource = result.Results
+            .GroupBy(r => r.SourceName)
+            .ToDictionary(g => g.Key, g => g.Take(3).ToList());
+        string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
+        return json;
     }
 }

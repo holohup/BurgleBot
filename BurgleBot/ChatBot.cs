@@ -19,7 +19,7 @@ public class ChatBot(IIoAdapter iIoAdapter, Kernel kernel)
         OpenAIPromptExecutionSettings openAiPromptExecutionSettings = new()
         { 
             ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
-            ChatSystemPrompt = @"You are a professional assistant, your job is to help. When processing images, always provide the link to original image.",
+            ChatSystemPrompt = @"You are a professional assistant, your job is to help. When processing images, always provide the link to original image. When dealing with documents, always provide the document name after each quote or summary. Under no circumstances provide links to documents, just document names. Links are intended only for animal pictures.",
             // ChatSystemPrompt = @"You are a professional assistant, your job is to help. Be thoughtful, 
             //                      always check your response. Do not provide your chain of thought in the response, 
             //                      just the result. When processing images, always provide the link to original image.",

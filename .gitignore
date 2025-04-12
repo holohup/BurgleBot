@@ -31,3 +31,5 @@ project.fragment.lock.json
 *.localhistory
 *.orig
 _ReSharper*/
+
+docs/

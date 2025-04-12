@@ -14,6 +14,9 @@
       <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0-preview.2.25163.2" />
+      <PackageReference Include="Microsoft.KernelMemory" Version="0.98.250324.1" />
+      <PackageReference Include="Microsoft.KernelMemory.Abstractions" Version="0.98.250324.1" />
+      <PackageReference Include="Microsoft.KernelMemory.SemanticKernelPlugin" Version="0.98.250324.1" />
       <PackageReference Include="Microsoft.SemanticKernel" Version="1.45.0" />
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.7" />
       <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="2.1.5" />
@@ -27,6 +30,12 @@
 
     <ItemGroup>
         <Content Include="Plugins\**\*">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Content Include="docs\**\*">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
