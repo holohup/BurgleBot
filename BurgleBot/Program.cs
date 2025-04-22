@@ -1,4 +1,5 @@
-﻿using BurgleBot;
+﻿using System.Diagnostics.CodeAnalysis;
+using BurgleBot;
 using BurgleBot.IOAdapters;
 using BurgleBot.Plugins.DataFetcher;
 using BurgleBot.Plugins.DataProcessor;
@@ -51,7 +52,9 @@ kernel.ImportPluginFromObject(new MemoryPlugin(memoryConnector, waitForIngestion
 
 await LoadAllPdfDocumentsAsync(memoryConnector);
 
+#pragma warning disable SKEXP0001
 Task.WaitAll(chatBot.Run());
+#pragma warning restore SKEXP0001
 
 
 #region Memory

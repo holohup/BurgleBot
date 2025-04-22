@@ -2,11 +2,8 @@ using System.ComponentModel;
 using System.Text;
 using System.Text.Json;
 using BurgleBot.Services;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
-using Microsoft.SemanticKernel.ChatCompletion;
-using Microsoft.SemanticKernel.Connectors.OpenAI;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
@@ -15,6 +12,8 @@ namespace BurgleBot.Plugins.DataProcessor;
 
 public sealed class DataProcessorPlugin(ISemanticKernelService kernelService)
 {
+    private const int MaxCharsInResponse = 100000;
+    
     [KernelFunction, Description("Converts an image to an ASCII picture")]
     public async Task<string> ConvertImageToAscii([Description("URL of the image")] string imageUrl)
     {
@@ -84,32 +83,29 @@ public sealed class DataProcessorPlugin(ISemanticKernelService kernelService)
     public async Task<string> FetchRecipe([Description("User query")] string query)
     {
         var result = await kernelService.FetchRecipeByVector(query);
-        var recipesBySource = result.Results
-            .GroupBy(r => r.SourceName)
-            .ToDictionary(g => g.Key, g => g.Take(3).ToList());
-        string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
-        return json;
+        return GroupAndTruncateResponse(result);
     }
-    
+
     [KernelFunction, Description("Returns results of vector search in computer manuals.")]
     public async Task<string> FetchComputerSpecs([Description("User query")] string query)
     {
         var result = await kernelService.FetchComputerSpecByVector(query);
-        var recipesBySource = result.Results
-            .GroupBy(r => r.SourceName)
-            .ToDictionary(g => g.Key, g => g.Take(3).ToList());
-        string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
-        return json;
+        return GroupAndTruncateResponse(result);
     }
     
     [KernelFunction, Description("Returns results of vector search to in kitchen appliance manuals.")]
     public async Task<string> FetchFromApplianceManual([Description("User query")] string query)
     {
         var result = await kernelService.FetchApplianceSpecByVector(query);
-        var recipesBySource = result.Results
+        return GroupAndTruncateResponse(result);
+    }
+    
+    private static string GroupAndTruncateResponse(SearchResult result)
+    {
+        var resultBySource = result.Results
             .GroupBy(r => r.SourceName)
             .ToDictionary(g => g.Key, g => g.Take(3).ToList());
-        string json = JsonSerializer.Serialize(recipesBySource, new JsonSerializerOptions { WriteIndented = true });
-        return json[..100000];
+        string json = JsonSerializer.Serialize(resultBySource, new JsonSerializerOptions { WriteIndented = true });
+        return json[..MaxCharsInResponse];
     }
 }
