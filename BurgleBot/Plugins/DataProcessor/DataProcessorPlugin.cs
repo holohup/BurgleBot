@@ -102,10 +102,27 @@ public sealed class DataProcessorPlugin(ISemanticKernelService kernelService)
     
     private static string GroupAndTruncateResponse(SearchResult result)
     {
-        var resultBySource = result.Results
-            .GroupBy(r => r.SourceName)
-            .ToDictionary(g => g.Key, g => g.Take(3).ToList());
-        string json = JsonSerializer.Serialize(resultBySource, new JsonSerializerOptions { WriteIndented = true });
-        return json[..MaxCharsInResponse];
+        var topPartitions = result.Results
+            .SelectMany(citation => citation.Partitions.Select(partition => new
+            {
+                SourceName = citation.SourceName,
+                Text = partition.Text,
+                Relevance = partition.Relevance
+            }))
+            .OrderByDescending(x => x.Relevance)
+            .Take(10)
+            .Select(x => new
+            {
+                x.SourceName,
+                x.Text
+            });
+        
+        string json = JsonSerializer.Serialize(
+            topPartitions,
+            new JsonSerializerOptions { WriteIndented = true }
+        );
+        
+        int length = Math.Min(json.Length, MaxCharsInResponse);
+        return json.Substring(0, length);
     }
 }

@@ -119,7 +119,8 @@ static async Task LoadAllPdfDocumentsAsync(IKernelMemory memoryConnector)
         
 
         Console.WriteLine($"Importing document '{documentId}' from file '{pdfFile}, index: {index}'.");
-        await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId, index: index);
+        if (index is not null) await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId);
+        else await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId, index: index);
     }
 }
 

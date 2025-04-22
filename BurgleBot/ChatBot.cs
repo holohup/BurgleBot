@@ -12,9 +12,9 @@ public class ChatBot(IIoAdapter ioAdapter, Kernel kernel)
     public async Task Run()
     {
         var history = new ChatHistory();
-        var reducer = new ChatHistoryTruncationReducer(targetCount: 2, thresholdCount: 5);
         var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-
+        var reducer = new ChatHistorySummarizationReducer(service: chatCompletionService, targetCount: 3, thresholdCount: 5);
+        
         await ioAdapter.SendMessageToUser("Hello! I am a helpful agent. What should I do?");
 
         string? userInput;
@@ -22,8 +22,8 @@ public class ChatBot(IIoAdapter ioAdapter, Kernel kernel)
         { 
             ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions,
             ChatSystemPrompt = @"You are a professional assistant, your job is to help. When processing images, 
-                                always provide the link to original image. When dealing with documents, always provide 
-                                the document name after each quote or summary. Under no circumstances provide links to 
+                                always provide the link to original image. When providing information from documents,
+                                always reference documents by name after each piece of info. Under no circumstances provide links to 
                                 documents, just document names. Links are intended only for animal pictures. Do not use
                                 any text formatting, output plain text.",
             MaxTokens = 4096,
