@@ -79,7 +79,7 @@ public sealed class DataProcessorPlugin(ISemanticKernelService kernelService)
         return result;
     }
 
-    [KernelFunction, Description("Returns results of recipe search to a user query in a json, where key is document filename and value - quotes found by vector search.")]
+    [KernelFunction, Description("Returns results of recipe vector search by user query in a json.")]
     public async Task<string> FetchRecipe([Description("User query")] string query)
     {
         var result = await kernelService.FetchRecipeByVector(query);
