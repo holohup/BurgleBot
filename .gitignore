@@ -5,12 +5,20 @@ obj/
 # Rider project files
 .idea/
 
+
+# docs
+docs/
+
+
 # Visual Studio files
 .vscode/
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+
+# docs
+docs/
 
 # OS-specific files
 .DS_Store
