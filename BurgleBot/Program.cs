@@ -1,6 +1,7 @@
 ﻿using BurgleBot;
 using BurgleBot.IOAdapters;
 using BurgleBot.Plugins.DataFetcher;
+using BurgleBot.Plugins.VersionBumper;
 using DotNetEnv.Configuration;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,10 +17,12 @@ var configuration = new ConfigurationBuilder()
 var token = configuration["OPENAI_API_KEY"]!;
 var modelId = configuration["MODEL"]!;
 var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, token);
-builder.Plugins.AddFromType<DataFetcherPlugin>();
+var versionBumperPlugin = new AnalyticsPlugin();
+builder.Plugins.AddFromType<DataFetcherPlugin>().AddFromObject(versionBumperPlugin);
 builder.Services.AddLogging(configure => configure.AddConsole());
 builder.Services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Information));
 Kernel kernel = builder.Build();
+versionBumperPlugin.Init(kernel);
 
 var services = new ServiceCollection();
 services.AddSingleton(kernel);
