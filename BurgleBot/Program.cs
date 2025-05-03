@@ -1,5 +1,4 @@
-﻿using System.Text;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Schema;
 using OllamaSharp;
 using OllamaSharp.Models;
@@ -11,19 +10,17 @@ ollama.SelectedModel = "mistral:7b";
 var request = new GenerateRequest
 {
     Prompt = "When Venya was 3 years old, I was three times older. How old am I now if Venya is 30?",
-    Format = JsonSerializerOptions.Default.GetJsonSchemaAsNode(typeof(Response)),
+    // Format = JsonSerializerOptions.Default.GetJsonSchemaAsNode(typeof(Response)),
     Options = new RequestOptions {Temperature = 0}
 };
 
-var result = new StringBuilder();
-
 await foreach (var stream in ollama.GenerateAsync(request))
 {
-    result.Append(stream.Response);
     Console.Write(stream.Response);
 }
 
-// var response = JsonSerializer.Deserialize<Response>(result.ToString());
+
+
 
 
 internal record Response
