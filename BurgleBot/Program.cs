@@ -9,9 +9,9 @@ ollama.SelectedModel = "mistral:7b";
 
 var request = new GenerateRequest
 {
-    Prompt = "When Venya was 3 years old, I was three times older. How old am I now if Venya is 30?",
+    Prompt = "When Venya was 3 years old, I was three times older. What is my current age if Venya is 30?",
     // Format = JsonSerializerOptions.Default.GetJsonSchemaAsNode(typeof(Response)),
-    Options = new RequestOptions {Temperature = 0}
+    Options = new RequestOptions { Temperature = 0 }
 };
 
 await foreach (var stream in ollama.GenerateAsync(request))
