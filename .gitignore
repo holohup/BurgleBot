@@ -12,6 +12,8 @@ obj/
 *.userosscache
 *.sln.docstates
 
+docs/
+
 # OS-specific files
 .DS_Store
 Thumbs.db
