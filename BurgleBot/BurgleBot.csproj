@@ -14,8 +14,13 @@
       <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="10.0.0-preview.2.25163.2" />
       <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0-preview.2.25163.2" />
-      <PackageReference Include="Microsoft.SemanticKernel" Version="1.45.0" />
+      <PackageReference Include="Microsoft.SemanticKernel" Version="1.48.0" />
+      <PackageReference Include="Microsoft.SemanticKernel.Abstractions" Version="1.48.0" />
+      <PackageReference Include="Microsoft.SemanticKernel.Connectors.Ollama" Version="1.48.0-alpha" />
       <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.48.0" />
+      <PackageReference Include="Microsoft.SemanticKernel.Core" Version="1.48.0" />
+      <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.2-beta2" />
+      <PackageReference Include="OllamaSharp" Version="5.1.13" />
     </ItemGroup>
 
     <ItemGroup>
