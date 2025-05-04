@@ -7,10 +7,12 @@ var uri = new Uri("http://192.168.2.32:11434");
 var ollama = new OllamaApiClient(uri);
 ollama.SelectedModel = "mistral:7b";
 
+var responseSchema = JsonSerializerOptions.Default.GetJsonSchemaAsNode(typeof(Response));
+
 var request = new GenerateRequest
 {
     Prompt = "When Venya was 3 years old, I was three times older. What is my current age if Venya is 30?",
-    // Format = JsonSerializerOptions.Default.GetJsonSchemaAsNode(typeof(Response)),
+    // Format = responseSchema,
     Options = new RequestOptions { Temperature = 0 }
 };
 
@@ -23,14 +25,14 @@ await foreach (var stream in ollama.GenerateAsync(request))
 
 
 
-internal record Response
+public record Response
 {
     public List<Step> Steps { get; set; }
-    public string FinalAnswer { get; init; }
+    public int FinalResult { get; set; }
 }
 
-internal record Step
+public record Step
 {
-    public string Explanation {get; init; }
-    public string Result {get; init; }
+    public string Explanation {get; set; }
+    public string Result {get; set; }
 }
