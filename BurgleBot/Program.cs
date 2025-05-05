@@ -1,8 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using BurgleBot;
+﻿using BurgleBot;
 using BurgleBot.IOAdapters;
 using BurgleBot.Plugins.DataFetcher;
-using BurgleBot.Plugins.DataProcessor;
 using BurgleBot.Services;
 using DotNetEnv.Configuration;
 using Microsoft.Extensions.Configuration;
@@ -25,12 +23,9 @@ var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, token);
 builder.Services.AddLogging(configure => configure.AddConsole());
 builder.Services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Information));
 
-string textPluginDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "TextPlugin");
 var semanticKernelAdapter = new SemanticKernelAdapter();
 builder.Services.AddSingleton<ISemanticKernelService>(semanticKernelAdapter);
 builder.Plugins.AddFromType<DataFetcherPlugin>();
-builder.Plugins.AddFromType<DataProcessorPlugin>();
-builder.Plugins.AddFromPromptDirectory(textPluginDirectory);
 
 Kernel kernel = builder.Build();
 semanticKernelAdapter.SKernel = kernel;
@@ -86,6 +81,8 @@ static async Task<bool> DocumentExistsAsync(IKernelMemory memoryConnector, strin
 {
     try
     {
+        var documentExists = await memoryConnector.IsDocumentReadyAsync(documentId, index: index);
+        Console.WriteLine($"{documentId} exists: {documentExists}");
         return await memoryConnector.IsDocumentReadyAsync(documentId, index: index);
     }
     catch (Exception)
@@ -119,8 +116,8 @@ static async Task LoadAllPdfDocumentsAsync(IKernelMemory memoryConnector)
         
 
         Console.WriteLine($"Importing document '{documentId}' from file '{pdfFile}, index: {index}'.");
-        if (index is not null) await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId);
-        else await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId, index: index);
+        if (index is not null) await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId, index: index);
+        else await memoryConnector.ImportDocumentAsync(filePath: pdfFile, documentId: documentId);
     }
 }
 

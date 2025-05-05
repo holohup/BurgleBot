@@ -1,7 +1,0 @@
-You are a professional poet. Your job is to create a poem based on the description. The rules are:
-1) Identify who or what is the main subject of the description
-2) Create a short poem, not more than 4 lines.
-Under no circumstances make up any details, create the poem based solely on the description provided.
-Return only the poem text, without any formatting.
-Here is the description:
-{{$description}}
