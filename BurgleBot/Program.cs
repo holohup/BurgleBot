@@ -83,7 +83,7 @@ static async Task<bool> DocumentExistsAsync(IKernelMemory memoryConnector, strin
     {
         var documentExists = await memoryConnector.IsDocumentReadyAsync(documentId, index: index);
         Console.WriteLine($"{documentId} exists: {documentExists}");
-        return await memoryConnector.IsDocumentReadyAsync(documentId, index: index);
+        return documentExists;
     }
     catch (Exception)
     {

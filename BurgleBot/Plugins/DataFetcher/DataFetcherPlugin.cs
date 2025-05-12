@@ -1,6 +1,5 @@
 using System.ComponentModel;
 using System.Text.Json;
-using BurgleBot.Models;
 using BurgleBot.Services;
 using Microsoft.KernelMemory;
 using Microsoft.SemanticKernel;
