@@ -7,20 +7,19 @@
       "temperature": 0.0,
       "top_p": 0.1,
       "presence_penalty": 0.0,
-      "frequency_penalty": 0.0,
-      "model_id": "gpt-4.1"
+      "frequency_penalty": 0.0
     }
   },
   "input_variables": [
     {
-      "name": "prompt",
-      "description": "Prompt for LLM",
+      "name": "expected",
+      "description": "What is expected to be extracted from sample data",
       "default": "",
       "is_required": true
     },
     {
-      "name": "input",
-      "description": "Text input for the plugin",
+      "name": "extracted",
+      "description": "What was actually extracted",
       "default": "",
       "is_required": true
     }
