@@ -4,6 +4,7 @@ obj/
 
 # Rider project files
 .idea/
+docs/
 
 # Visual Studio files
 .vscode/
