@@ -4,103 +4,66 @@ using BurgleBot.IOAdapters;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.Agents;
 using Microsoft.SemanticKernel.Agents.Chat;
+using Microsoft.SemanticKernel.Agents.OpenAI;
 using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace BurgleBot;
 
-public class ChatBot(IIoAdapter ioAdapter, DefaultKernel kernel, SmartKernel smartKernel)
+public class ChatBot(IIoAdapter ioAdapter, DefaultKernel kernel, SmartKernel smartKernel, NotSoSmartKernel notSoSmartKernel)
 {
     [Experimental("SKEXP0110")]
     public async Task Run()
     {
-        var agents = new Agents(smartKernel.Instance, kernel.Instance);
-        var mainChatThread = new ChatHistoryAgentThread();
+        var agents = new Agents(smartKernel.Instance, kernel.Instance, notSoSmartKernel.Instance);
         
-        var userInput = "Please create a prompt to extract all person names from a given text";
-
-        var selectionFunction = AgentGroupChat.CreatePromptFunctionForStrategy(
-            """
-            Examine the provided response and choose the next participant. Return only the name
-            of the participant, without any explanation, extra text of formatting. Never choose the participant
-            named in the response.
-            
-            You may choose between those participants: PromptWriter, PromptChecker
-            
-            Always follow the rules:
-            • If response is user input, it is PromptWriter’s turn
-            
-            Response:
-            {{$lastmessage}}
-            """, safeParameterNames: "lastmessage");
+        var userInput = """
+                        Please, create a prompt to extract all persons mentioned in text.
+                        I want to extract name, father’s name, mother’s name, father’s age when the person was born and persons lifespan,
+                        but only from the text (leave the fields empty if the information is unknown)
+                        The result should be in json formal, e.g.:
+                        {"Name":"Joshua","Father":"David", "Mother":"Elena","FatherAgeAtBirth":30,"Lifespan":""}
+                        """;
         
-        const string TerminationToken = "PROMPT WORKS";
-        ChatHistoryTruncationReducer historyReducer = new(1);
-        
-        var terminationFunction = AgentGroupChat.CreatePromptFunctionForStrategy(
-                $$$"""
-                    You are a result evaluator.
-                    Rules:
-                    - If the test result shows accuracy **above 90%** AND there are **no suggestions or improvements**, then set "shouldTerminate": true.
-                    - Otherwise, set "shouldTerminate": false.
-
-                    Respond with a valid JSON object with a single boolean field named shouldTerminate. Do not explain.
-
-                    Example outputs:
-                    { "shouldTerminate": true }
-                    { "shouldTerminate": false }
-
-                    RESPONSE:
-                    {{$lastmessage}}
-                    """,
-                safeParameterNames: "lastmessage");
-
-        var chat = new AgentGroupChat(agents.promptChecker, agents.promptWriter)
+        var writerThread = new ChatHistoryAgentThread();
+        var prompt = string.Empty;
+        var feedback = string.Empty;
+        await foreach (ChatMessageContent response in agents.promptWriter.InvokeAsync(userInput))
         {
-            ExecutionSettings = new AgentGroupChatSettings
-            {
-                SelectionStrategy = new KernelFunctionSelectionStrategy(selectionFunction, kernel.Instance)
-                {
-                    InitialAgent = agents.promptWriter,
-                    HistoryReducer = historyReducer,
-                    HistoryVariableName = "lastmessage",
-                    ResultParser = (result) => result.GetValue<string>() ?? agents.promptWriter.Name,
-                },
-                TerminationStrategy = new KernelFunctionTerminationStrategy(terminationFunction, kernel.Instance)
-                {
-                    Agents = [agents.promptChecker],
-                    HistoryReducer = historyReducer,
-                    HistoryVariableName = "lastmessage",
-                    MaximumIterations = 12,
-                    ResultParser = result =>
-                    {
-                        var raw = result.GetValue<string>()?.Trim();
-                        Console.WriteLine($"[DEBUG] Termination function raw result: {raw}");
+            prompt = response.Content;
+        }
+        ioAdapter.SendMessageToUser($"New prompt: {prompt}");
+        await foreach (ChatMessageContent response in agents.promptChecker.InvokeAsync(prompt))
+        {
+            feedback = response.Content;
+        }
+        ioAdapter.SendMessageToUser($"New feedback: {feedback}");
 
-                        try
-                        {
-                            var parsed = JsonSerializer.Deserialize<JsonElement>(raw ?? "");
-                            return parsed.TryGetProperty("shouldTerminate", out var val) && val.GetBoolean();
-                        }
-                        catch
-                        {
-                            return false; // If anything goes wrong, assume it's not done
-                        }
-                    }
-                }
-            }
-        };
-        var isComplete = false;
-        chat.AddChatMessage(new ChatMessageContent(AuthorRole.User, userInput));
+        var improvedPrompt = string.Empty;
+        var accuracy = 0f;
+        bool isComplete = false;
         do
         {
-            await foreach (var response in chat.InvokeAsync())
+            await foreach (var response in agents.promptWriter.InvokeAsync(
+                               $"Please refine the prompt. Prompt: {prompt}, Feedback: {feedback}"))
             {
-                ioAdapter.SendMessageToUser($"""
-                                             {response.AuthorName}:
-                                             {response.Content}
-                                             =========================================================================
-                                             """);
+                improvedPrompt = response.Message.Content;
             }
-        } while (!chat.IsComplete);
+            ioAdapter.SendMessageToUser($"\nNew prompt: {improvedPrompt}");
+            await foreach (ChatMessageContent response in agents.promptChecker.InvokeAsync(improvedPrompt))
+            {
+                feedback = response.Content;
+            }
+            ioAdapter.SendMessageToUser($"\nNew feedback: {feedback}");
+            var accuracyStr = await notSoSmartKernel.Instance.InvokePromptAsync(
+                "Extract the extraction accuracy in %, provide only the result. {{$input}}",
+                new KernelArguments { ["input"] = feedback });
+            if (float.TryParse(accuracyStr.ToString().TrimEnd('%'), out var value))
+            {
+                accuracy = value;
+                ioAdapter.SendMessageToUser($"Extraction accuracy: {accuracy}");
+            }
+            if (accuracy > 90) isComplete = true;
+        } while (!isComplete);
+        ioAdapter.SendMessageToUser($"BINGO! Final prompt: {prompt}, accuracy: {accuracy}");
     }
 }

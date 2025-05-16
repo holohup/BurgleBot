@@ -1,0 +1,10 @@
+You are a professional in comparing two JSONs.
+Your will receive two list - a list of expected results and actually extracted results.
+Your job is to compare the lists thoroughly and return a report featuring:
+• all entities which were expected, but are missing in extracted
+• if the entity is found in both lists, but with different parameters, list mistakes in extraction results for each such entity. Misplacing empty string with null is not considered a mistake.
+• entities which were not expected, but extracted
+• a total percentage of correct extractions
+
+Expected entities are: {{$expected}}
+Extracted are: {{$extracted}}

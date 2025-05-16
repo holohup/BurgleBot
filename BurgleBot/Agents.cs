@@ -10,45 +10,50 @@ public class Agents
     public ChatCompletionAgent promptChecker;
     public ChatCompletionAgent promptWriter;
     
-    public Agents(Kernel smartKernel, Kernel defaultKernel)
+    public Agents(Kernel smartKernel, Kernel defaultKernel, Kernel notSoSmartKernel)
     {
-        var kernel = defaultKernel.Clone();
+        var kernel = smartKernel.Clone();
+        kernel.ImportPluginFromPromptDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "WriterPlugins"));
         promptWriter = new ChatCompletionAgent
         {
             Name = "PromptWriter",
             Instructions = """
-                           You are a professional prompt creator. You need to create a prompt which accomplishes the task
-                           defined by the user in the best way possible. Prompt creation can be tricky, you must act iteratively:
-                           when you see the results of your current prompt, you must decide, whether to improve the current
-                           idea, or to come up with a new one. Take into account the feedback you receive. Under no circumstances
-                           give up!
+                           You are a professional LLM prompt creator. Your job is to create and refine prompts.
+                           **Never** emit analysis, commentary, or instructions to — only output the final text of the
+                           LLM-prompt itself, plain text without formatting.
                            """,
             Kernel = kernel,
             Arguments = new KernelArguments(
                 new OpenAIPromptExecutionSettings
                 {
-                    Temperature = 0.3,
+                    Temperature = 0.4,
                     MaxTokens = 4096,
-                    TopP = 0.5
+                    TopP = 0.5,
+                    FunctionChoiceBehavior = FunctionChoiceBehavior.Auto()
                 })
         };
 
-        var checkerKernel = smartKernel.Clone();
-        checkerKernel.ImportPluginFromPromptDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "TextPlugins"));
-        checkerKernel.ImportPluginFromType<DataFetcherPlugin>();
+        var checkerKernel = defaultKernel.Clone();
+        var workingKernel = defaultKernel.Clone();
+        workingKernel.ImportPluginFromPromptDirectory(Path.Combine(Directory.GetCurrentDirectory(), "Plugins", "CheckerPlugins"));
+        var plugin = new PromptValidationPlugin(workingKernel);
+        checkerKernel.ImportPluginFromObject(plugin, "PromptValidationPlugin");
         promptChecker = new ChatCompletionAgent
         {
             Name = "PromptChecker",
             Instructions = """
-                           You are a professional agent who checks prompts.
-                           For each given prompt you must:
-                           1) Use the sample data to check the prompt against the LLM
-                           2) Use the results returned by the LLM to validate
-                           Your job is to check what the LLM returns given prompt and sample input, test the results and report.
-                           In your report provide the percentage of correct extractions, and also if you see some regularity
-                           in errors, your suspicions. Under no circumstances give away any data from the samples and expected results,
+                           Your job is to validate each prompt you receive using ValidatePrompt function and
+                           provide the following feedback:
+                           • the percentage of correct extractions
+                           • if you see some regularity in errors, your suspicions.
+                           • if you have, improvement suggestions
+
+                           Under no circumstances create your own prompt, or rewrite other prompts - your job is just to
+                           validate using the functions you have and provide analytics on the results.
+                           
+                           Never give away any data from the samples and expected results,
                            since it might bias the LLM creating the prompt to tune the prompt to the sample, and the tests should be
-                           fully independent of the implementation. 
+                           fully independent of the implementation.
                            """,
             Kernel = checkerKernel,
             Arguments = new KernelArguments(

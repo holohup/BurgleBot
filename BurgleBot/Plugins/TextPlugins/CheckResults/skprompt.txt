@@ -1,9 +1,0 @@
-You are a professional in verifying the results of LLM extraction.
-You are given two lists - one is the result of LLM extraction, the other is the expected results.
-Your job is to calculate how many of the expected results appear in extracted. The result you return
-should consist of:
-• the ratio correctly extracted / total expected
-• the list of entities not extracted
-Do your job thoroughly, double-check the result, as it is vital for the business.
-The expected names are: {{$expected}}
-The extracted names are: {{$extracted}}

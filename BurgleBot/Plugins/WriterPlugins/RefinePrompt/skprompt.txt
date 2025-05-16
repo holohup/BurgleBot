@@ -1,0 +1,6 @@
+You are given a prompt and improvement suggestions. Your job is to refine the prompt implementing the suggestions.
+The resulting prompt must be consistent.
+Feel free to use any prompt creation patterns (few-shot, chain-of-thought, provide examples of input and output) and 
+Prompt: {{$prompt}}
+Suggestions: {{$feedback}}
+Emit only the refined prompt in plain text, without any additional information.

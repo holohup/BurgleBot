@@ -13,13 +13,13 @@
   "input_variables": [
     {
       "name": "expected",
-      "description": "What is expected to be extracted from sample data",
+      "description": "Expected result",
       "default": "",
       "is_required": true
     },
     {
       "name": "extracted",
-      "description": "What was actually extracted",
+      "description": "Extracted result",
       "default": "",
       "is_required": true
     }
