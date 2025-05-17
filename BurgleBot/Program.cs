@@ -18,7 +18,7 @@ var modelId = configuration["MODEL"]!;
 var builder = Kernel.CreateBuilder().AddOpenAIChatCompletion(modelId, token);
 builder.Plugins.AddFromType<DataFetcherPlugin>();
 builder.Services.AddLogging(configure => configure.AddConsole());
-builder.Services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Information));
+builder.Services.AddLogging(configure => configure.SetMinimumLevel(LogLevel.Warning));
 Kernel kernel = builder.Build();
 
 var services = new ServiceCollection();
@@ -28,4 +28,6 @@ services.AddSingleton<ChatBot>();
 var serviceProvider = services.BuildServiceProvider();
 
 var chatBot = serviceProvider.GetRequiredService<ChatBot>();
+#pragma warning disable SKEXP0010
 Task.WaitAll(chatBot.Run());
+#pragma warning restore SKEXP0010
