@@ -24,8 +24,7 @@ public class ChatBot(IIoAdapter iIoAdapter, Kernel kernel)
             TopP = 0.9,
             Temperature = 0.1,
             PresencePenalty = 0,
-            FrequencyPenalty = 0,
-            // FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
+            FrequencyPenalty = 0
         };
         while (!string.IsNullOrWhiteSpace(userInput = await iIoAdapter.GetUserInput()))
         {
